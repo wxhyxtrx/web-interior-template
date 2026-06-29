@@ -5,6 +5,7 @@ import React from 'react'
 import { fileURLToPath } from 'url'
 
 import config from '@/payload.config'
+import { Typography } from '@/components/ui/typography'
 import './styles.css'
 
 export default async function HomePage() {
@@ -27,8 +28,14 @@ export default async function HomePage() {
             width={65}
           />
         </picture>
-        {!user && <h1>Welcome to your new project.</h1>}
-        {user && <h1>Welcome back, {user.email}</h1>}
+
+        {/* variant="h1" → renders <h1> automatically */}
+        {!user && <Typography variant="h1">Welcome to your new project.</Typography>}
+        {user && <Typography variant="h1">Welcome back, {user.email}</Typography>}
+
+        {/* variant="lead" → renders <p> with lead styling */}
+        <Typography variant="lead">A Payload CMS starter with Next.js</Typography>
+
         <div className="links">
           <a
             className="admin"
@@ -49,9 +56,11 @@ export default async function HomePage() {
         </div>
       </div>
       <div className="footer">
-        <p>Update this page by editing</p>
+        {/* variant="muted" → renders <p> with muted color */}
+        <Typography variant="muted">Update this page by editing</Typography>
         <a className="codeLink" href={fileURL}>
-          <code>app/(frontend)/page.tsx</code>
+          {/* variant="code" → renders <code> with code styling */}
+          <Typography variant="code">app/(frontend)/page.tsx</Typography>
         </a>
       </div>
     </div>
