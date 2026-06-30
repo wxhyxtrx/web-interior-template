@@ -1,7 +1,9 @@
-﻿import React from 'react'
+import React from 'react'
 import { Banner } from '@/components/shared/banner'
+import { MaterialGallery } from '@/components/shared/material-gallery'
 import { ProductShowcase } from '@/components/shared/product-showcase'
 import { ServiceSection } from '@/components/shared/service-section'
+import { ArticlesSection } from '@/components/shared/articles-section'
 
 export default async function HomePage() {
   // In production these values would come from your CMS / API fetch
@@ -68,8 +70,60 @@ export default async function HomePage() {
         buttons={[{ label: 'BOOK A CONSULTATION', href: '/contact', variant: 'outline' }]}
         image="/service-hero.jpg"
         layout="image-left"
-        className="bg-secondary-foreground"
+        className="bg-accent-foreground"
       />
+
+      {/*
+       * MaterialGallery — Carousel mode
+       * Swaps to a horizontal slide carousel; prev/next controls appear below.
+       * Same data shape — only `displayMode` changes.
+       */}
+      <MaterialGallery
+        title="Our Material Library"
+        subtitle="Explore every texture, grain, and patina we work with — each sourced with intention."
+        displayMode="carousel"
+        gridColumns={3}
+        imageAspect="aspect-video"
+        className="bg-secondary-foreground"
+        items={[
+          {
+            id: 'nordic-ash',
+            label: 'NORDIC ASH',
+            image: '/materials/nordic-ash.png',
+            imageAlt: 'Nordic Ash wood texture',
+          },
+          {
+            id: 'charcoal-boucle',
+            label: 'CHARCOAL BOUCLÉ',
+            image: '/materials/charcoal-boucle.png',
+            imageAlt: 'Charcoal Bouclé fabric texture',
+          },
+          {
+            id: 'honed-travertine',
+            label: 'HONED TRAVERTINE',
+            image: '/materials/honed-travertine.png',
+            imageAlt: 'Honed Travertine stone texture',
+          },
+          {
+            id: 'aged-brass',
+            label: 'AGED BRASS',
+            image: '/materials/aged-brass.png',
+            imageAlt: 'Aged Brass metal texture',
+          },
+          {
+            id: 'smoked-oak',
+            label: 'SMOKED OAK',
+            image: '/materials/smoked-oak.png',
+            imageAlt: 'Smoked Oak wood texture',
+          },
+        ]}
+        classNames={{
+          prevButton: 'text-foreground',
+          nextButton: 'text-foreground',
+        }}
+      />
+
+      <ArticlesSection className="bg-background" />
     </div>
   )
 }

@@ -54,7 +54,7 @@ export function Banner({
         className={cn('absolute inset-0', classNames?.overlay)}
         style={{
           background:
-            'linear-gradient(to top, rgba(14,10,6,0.72) 0%, rgba(14,10,6,0.30) 40%, rgba(14,10,6,0.08) 70%, transparent 100%)',
+            'linear-gradient(to top, rgba(14,10,6,0.72) 0%, rgba(14,10,6,0.30) 60%, rgba(14,10,6,0.08) 90%, transparent 100%)',
         }}
       />
 
@@ -63,11 +63,11 @@ export function Banner({
         className={cn(
           // Mobile: more compact padding; scales up progressively
           'absolute bottom-0 left-0 w-full',
-          'px-5 pb-8',
-          'sm:px-10 sm:pb-12',
-          'md:max-w-[65%] md:px-12 md:pb-14',
-          'lg:max-w-[58%] lg:px-16 lg:pb-16',
-          'xl:max-w-[52%] xl:px-20 xl:pb-20',
+          'px-5 pb-10',
+          'sm:px-10 sm:pb-14',
+          'md:max-w-[65%] md:px-12 md:pb-18',
+          'lg:max-w-[58%] lg:px-16 lg:pb-20',
+          'xl:max-w-[52%] xl:px-20 xl:pb-24',
           classNames?.content,
         )}
       >
