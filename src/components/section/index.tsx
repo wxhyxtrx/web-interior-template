@@ -1,18 +1,22 @@
 import { cn } from '@/lib/utils'
-import React, {
-  createContext,
-  useContext,
-  type HTMLAttributes,
-  type ReactElement,
-  type ReactNode,
-} from 'react'
+import { createContext, forwardRef, useContext, type HTMLAttributes, type ReactNode } from 'react'
 
 // Shared types
 export type SectionHeaderType = 'horizontal' | 'vertical' | 'centered'
 
 // Context - supaya SectionTitle & SectionDescription tahu orientasi
 // header-nya tanpa harus dioper manual sebagai props
-const SectionHeaderContext = createContext<SectionHeaderType>('vertical')
+const SectionHeaderContext = createContext<SectionHeaderType | undefined>(undefined)
+
+function useSectionHeaderContext() {
+  const context = useContext(SectionHeaderContext)
+  if (context === undefined) {
+    throw new Error(
+      'Components <SectionTitle />, <SectionDescription />, or <SectionAction /> must be used within <SectionHeader />.',
+    )
+  }
+  return context
+}
 
 // <Section />
 // Wrapper paling luar. Buat menunjang SEO nya bang pake semantik
@@ -20,13 +24,21 @@ export interface SectionProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode
 }
 
-export function Section({ className, children, ...props }: SectionProps): ReactElement {
-  return (
-    <section className={cn('w-full bg-secondary min-h-screen', className)} {...props}>
-      {children}
-    </section>
-  )
-}
+export const Section = forwardRef<HTMLElement, SectionProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <section
+        ref={ref}
+        data-slot="section"
+        className={cn('w-full bg-secondary min-h-screen', className)}
+        {...props}
+      >
+        {children}
+      </section>
+    )
+  },
+)
+Section.displayName = 'Section'
 
 // <SectionContent />
 // Pembungkus padding konten di dalam Section.
@@ -34,26 +46,24 @@ export interface SectionContentProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode
 }
 
-export function SectionContent({
-  className,
-  children,
-  ...props
-}: SectionContentProps): ReactElement {
-  return (
-    <div
-      className={cn(
-        // Display
-        'flex flex-col',
-        // Spacing
-        'gap-4  px-5 py-8 sm:px-8 sm:py-10 md:px-12 lg:px-16 xl:px-20',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </div>
-  )
-}
+export const SectionContent = forwardRef<HTMLDivElement, SectionContentProps>(
+  ({ className, children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        data-slot="section-content"
+        className={cn(
+          'flex flex-col gap-4 px-5 py-8 sm:px-8 sm:py-10 md:px-12 lg:px-16 xl:px-20',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  },
+)
+SectionContent.displayName = 'SectionContent'
 
 // <SectionHeader type="horizontal | vertical" action={...} />
 //
@@ -76,110 +86,115 @@ export function SectionContent({
 
 export interface SectionHeaderProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   type?: SectionHeaderType
-  action?: ReactNode
   /** Diharapkan berisi <SectionTitle> dan/atau <SectionDescription>. */
   children?: ReactNode
 }
 
-function isElementOfType<P>(
-  node: ReactNode,
-  component: (props: P) => ReactElement | null,
-): node is ReactElement<P, typeof component> {
-  return React.isValidElement<P>(node) && node.type === component
-}
-
-export function SectionHeader({
-  type = 'vertical',
-  className,
-  children,
-  action,
-  ...props
-}: SectionHeaderProps): ReactElement {
-  const childArray = React.Children.toArray(children)
-
-  const title = childArray.find((child) => isElementOfType<SectionTitleProps>(child, SectionTitle))
-  const description = childArray.find((child) =>
-    isElementOfType<SectionDescriptionProps>(child, SectionDescription),
-  )
-  const rest = childArray.filter((child) => child !== title && child !== description)
-
-  return (
-    <SectionHeaderContext.Provider value={type}>
-      <div className={cn(className)} {...props}>
-        {type === 'horizontal' ? (
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">{title}</div>
-            <div className="flex flex-col items-end gap-1 min-w-0">
-              {description}
-              {action}
-            </div>
-          </div>
-        ) : type === 'centered' ? (
-          <div className="flex flex-col items-center gap-1 text-center">
-            {title}
-            {description}
-            {action ? <div className="mt-2">{action}</div> : null}
-          </div>
-        ) : (
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1 min-w-0">
-              {title}
-              {description}
-            </div>
-            {action ? <div className="shrink-0">{action}</div> : null}
-          </div>
-        )}
-        {rest}
-      </div>
-    </SectionHeaderContext.Provider>
-  )
-}
+export const SectionHeader = forwardRef<HTMLDivElement, SectionHeaderProps>(
+  ({ type = 'vertical', className, children, ...props }, ref) => {
+    return (
+      <SectionHeaderContext.Provider value={type}>
+        <div
+          ref={ref}
+          data-slot="section-header"
+          data-type={type}
+          className={cn(
+            'group gap-4 items-start',
+            // vertical = stack ke bawah, baru sejajar mulai breakpoint sm
+            type === 'vertical' && 'flex flex-col sm:flex-row sm:items-start sm:justify-between',
+            // horizontal = selalu sejajar berdampingan
+            type === 'horizontal' && 'flex flex-row items-center justify-between',
+            type === 'centered' && 'flex flex-col items-center text-center',
+            className,
+          )}
+          {...props}
+        >
+          {children}
+        </div>
+      </SectionHeaderContext.Provider>
+    )
+  },
+)
+SectionHeader.displayName = 'SectionHeader'
 
 export interface SectionTitleProps extends HTMLAttributes<HTMLHeadingElement> {
   children?: ReactNode
 }
 
-export function SectionTitle({ className, children, ...props }: SectionTitleProps): ReactElement {
-  const type = useContext(SectionHeaderContext)
-  return (
-    <h3
-      className={cn(
-        'font-serif text-2xl sm:text-3xl md:text-4xl leading-tight tracking-[-0.01em] text-foreground',
-        type === 'centered' && 'text-center',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </h3>
-  )
-}
+export const SectionTitle = forwardRef<HTMLHeadingElement, SectionTitleProps>(
+  ({ className, children, ...props }, ref) => {
+    useSectionHeaderContext()
+    return (
+      <h3
+        ref={ref}
+        data-slot="section-title"
+        className={cn(
+          'font-serif text-2xl sm:text-3xl md:text-4xl leading-tight tracking-[-0.01em] text-foreground',
+          'group-[data-type=centered]:text-center',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </h3>
+    )
+  },
+)
+SectionTitle.displayName = 'SectionTitle'
 
 // <SectionDescription />
 export interface SectionDescriptionProps extends HTMLAttributes<HTMLParagraphElement> {
   children?: ReactNode
 }
 
-export function SectionDescription({
-  className,
-  children,
-  ...props
-}: SectionDescriptionProps): ReactElement {
-  const type = useContext(SectionHeaderContext)
-  return (
-    <p
-      className={cn(
-        'mt-1.5 text-sm text-muted-foreground max-w-sm leading-relaxed',
-        type === 'horizontal' && 'text-right',
-        type === 'centered' && 'text-center',
-        className,
-      )}
-      {...props}
-    >
-      {children}
-    </p>
-  )
+export const SectionDescription = forwardRef<HTMLParagraphElement, SectionDescriptionProps>(
+  ({ className, children, ...props }, ref) => {
+    useSectionHeaderContext()
+    return (
+      <p
+        ref={ref}
+        data-slot="section-description"
+        className={cn(
+          'mt-1.5 text-sm text-muted-foreground max-w-sm leading-relaxed',
+          'group-[data-type=centered]:text-center',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </p>
+    )
+  },
+)
+SectionDescription.displayName = 'SectionDescription'
+
+export interface SectionActionProps extends HTMLAttributes<HTMLDivElement> {
+  children?: ReactNode
 }
+
+export const SectionAction = forwardRef<HTMLDivElement, SectionActionProps>(
+  ({ className, children, ...props }, ref) => {
+    const type = useSectionHeaderContext()
+    void type // hapus baris ini kalau sudah dipakai untuk conditional rendering
+
+    return (
+      <div
+        ref={ref}
+        data-slot="section-action"
+        className={cn(
+          'shrink-0',
+          'group-[data-type=horizontal]:self-end group-[data-type=horizontal]:sm:self-start group-[data-type=horizontal]:mt-1',
+          'group-[data-type=centered]:mt-2',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    )
+  },
+)
+SectionAction.displayName = 'SectionAction'
 
 // export default function Demo(): ReactElement {
 //   return (

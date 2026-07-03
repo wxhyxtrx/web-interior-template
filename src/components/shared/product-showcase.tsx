@@ -10,6 +10,7 @@ import { Typography } from '@/components/ui/typography'
 import type { ProductShowcaseProps, ShowcaseProduct } from '@/types/product-showcase'
 import {
   Section,
+  SectionAction,
   SectionContent,
   SectionDescription,
   SectionHeader,
@@ -218,8 +219,11 @@ export function ProductShowcase({
         <SectionHeader
           type="horizontal"
           // Nanti ini di inject pake button field di path /fields bang
-          action={
-            viewAllHref && (
+        >
+          <SectionTitle>{title}</SectionTitle>
+          {subtitle && <SectionDescription>{subtitle}</SectionDescription>}
+          {viewAllHref && (
+            <SectionAction>
               <Link
                 href={viewAllHref}
                 className={cn(
@@ -232,11 +236,8 @@ export function ProductShowcase({
               >
                 {viewAllLabel}
               </Link>
-            )
-          }
-        >
-          <SectionTitle>{title}</SectionTitle>
-          {subtitle && <SectionDescription>{subtitle}</SectionDescription>}
+            </SectionAction>
+          )}
         </SectionHeader>
 
         {/* ── Product grid ── */}
